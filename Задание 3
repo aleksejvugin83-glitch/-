@@ -1,0 +1,228 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.HashMap;
+public class Show implements Comparable<Show> {
+    private String author;
+    private String name;
+    private String description;
+    private int periodType; // 1-ежедневно, 2-еженедельно, 3-ежемесячно
+    private String time; // Добавляем время показа
+    
+    public Show(String author, String name, String description, int periodType, String time) {
+        this.author = author;
+        this.name = name;
+        this.description = description;
+        this.periodType = periodType;
+        this.time = time;
+    }
+    
+    // Геттеры и сеттеры
+    public String getAuthor() { return author; }
+    public String getName() { return name; }
+    public String getDescription() { return description; }
+    public int getPeriodType() { return periodType; }
+    public String getTime() { return time; }
+    
+    public void setAuthor(String author) { this.author = author; }
+    public void setName(String name) { this.name = name; }
+    public void setDescription(String description) { this.description = description; }
+    public void setPeriodType(int periodType) { this.periodType = periodType; }
+    public void setTime(String time) { this.time = time; }
+    
+    @Override
+    public String toString() {
+        String period;
+        switch(periodType) {
+            case 1:
+                period = "ежедневно";
+                break;
+            case 2:
+                period = "еженедельно";
+                break;
+            case 3:
+                period = "ежемесячно";
+                break;
+            default:
+                period = "неизвестно";
+        }
+        
+        return String.format("Телепередача: %s\n" +
+                           "Ведущий: %s\n" +
+                           "Время: %s\n" +
+                           "Описание: %s\n" +
+                           "Периодичность: %s\n", 
+                           name, author, time, description, period);
+    }
+    
+    // Реализация сортировки по названию передачи
+    @Override
+    public int compareTo(Show other) {
+        return this.name.compareToIgnoreCase(other.name);
+    }
+    
+    // Внутренние классы для сортировки
+    
+    // Сортировка по наименованию передачи
+    public static class NameComparator implements Comparator<Show> {
+        @Override
+        public int compare(Show s1, Show s2) {
+            return s1.getName().compareToIgnoreCase(s2.getName());
+        }
+    }
+    
+    // Сортировка по времени (формат "HH:MM")
+    public static class TimeComparator implements Comparator<Show> {
+        @Override
+        public int compare(Show s1, Show s2) {
+            return s1.getTime().compareTo(s2.getTime());
+        }
+    }
+    
+    // Сортировка по периодичности, затем по времени
+    public static class PeriodTimeComparator implements Comparator<Show> {
+        @Override
+        public int compare(Show s1, Show s2) {
+            int periodCompare = Integer.compare(s1.getPeriodType(), s2.getPeriodType());
+            if (periodCompare != 0) {
+                return periodCompare;
+            }
+            return s1.getTime().compareTo(s2.getTime());
+        }
+    }
+    
+    // Сортировка по времени, затем по названию
+    public static class TimeNameComparator implements Comparator<Show> {
+        @Override
+        public int compare(Show s1, Show s2) {
+            int timeCompare = s1.getTime().compareTo(s2.getTime());
+            if (timeCompare != 0) {
+                return timeCompare;
+            }
+            return s1.getName().compareToIgnoreCase(s2.getName());
+        }
+    }
+}
+// Демонстрационный класс
+class ShowDemo {
+    public static void main(String[] args) {
+        // Создаем список телепередач
+        List<Show> shows = new ArrayList<>();
+        
+        shows.add(new Show("Иван Иванов", "Новости", "Последние новости дня", 1, "19:00"));
+        shows.add(new Show("Петр Петров", "Интервью", "Интервью с известными людьми", 2, "21:30"));
+        shows.add(new Show("Анна Смирнова", "Кулинария", "Готовим вместе", 1, "10:00"));
+        shows.add(new Show("Сергей Козлов", "Спорт", "Обзор спортивных событий", 3, "18:45"));
+        shows.add(new Show("Мария Волкова", "Документальный", "История искусства", 2, "22:15"));
+        shows.add(new Show("Алексей Новиков", "Новости", "Утренние новости", 1, "07:00"));
+        
+        System.out.println("=== Исходный список передач ===");
+        for (Show show : shows) {
+            System.out.println(show);
+        }
+        
+        // 1. Сортировка по наименованию передачи
+        Collections.sort(shows, new Show.NameComparator());
+        System.out.println("\n=== Сортировка по наименованию передачи ===");
+        for (Show show : shows) {
+            System.out.println("Название: " + show.getName() + ", Время: " + show.getTime());
+        }
+        
+        // 2. Сортировка по времени
+        Collections.sort(shows, new Show.TimeComparator());
+        System.out.println("\n=== Сортировка по времени показа ===");
+        for (Show show : shows) {
+            System.out.println("Время: " + show.getTime() + ", Название: " + show.getName());
+        }
+        
+        // 3. Сортировка с использованием Comparable (по названию)
+        Collections.sort(shows);
+        System.out.println("\n=== Сортировка по названию (Comparable) ===");
+        for (Show show : shows) {
+            System.out.println("Название: " + show.getName());
+        }
+        
+        // 4. Сортировка по периодичности, затем по времени
+        Collections.sort(shows, new Show.PeriodTimeComparator());
+        System.out.println("\n=== Сортировка по периодичности, затем по времени ===");
+        for (Show show : shows) {
+            String period;
+            switch(show.getPeriodType()) {
+                case 1:
+                    period = "ежедневно";
+                    break;
+                case 2:
+                    period = "еженедельно";
+                    break;
+                case 3:
+                    period = "ежемесячно";
+                    break;
+                default:
+                    period = "неизвестно";
+            }
+            System.out.println("Периодичность: " + period + ", Время: " + show.getTime() + 
+                             ", Название: " + show.getName());
+        }
+        
+        // 5. Сортировка по времени, затем по названию
+        Collections.sort(shows, new Show.TimeNameComparator());
+        System.out.println("\n=== Сортировка по времени, затем по названию ===");
+        for (Show show : shows) {
+            System.out.println("Время: " + show.getTime() + ", Название: " + show.getName());
+        }
+        
+        // 6. Сортировка с использованием лямбда-выражений (Java 8+)
+        System.out.println("\n=== Сортировка по времени (лямбда) ===");
+        shows.sort((s1, s2) -> s1.getTime().compareTo(s2.getTime()));
+        for (Show show : shows) {
+            System.out.println("Время: " + show.getTime() + " - " + show.getName());
+        }
+        
+        System.out.println("\n=== Сортировка по названию в обратном порядке ===");
+        shows.sort((s1, s2) -> s2.getName().compareToIgnoreCase(s1.getName()));
+        for (Show show : shows) {
+            System.out.println("Название: " + show.getName());
+        }
+        
+        // 7. Поиск передач в определенное время
+        String searchTime = "19:00";
+        System.out.println("\n=== Передачи в " + searchTime + " ===");
+        for (Show show : shows) {
+            if (show.getTime().equals(searchTime)) {
+                System.out.println(show);
+            }
+        }
+        
+        // 8. Группировка по периодичности
+        System.out.println("\n=== Группировка по периодичности ===");
+        HashMap<Integer, List<Show>> showsByPeriod = new HashMap<>();
+        for (Show show : shows) {
+            if (!showsByPeriod.containsKey(show.getPeriodType())) {
+                showsByPeriod.put(show.getPeriodType(), new ArrayList<>());
+            }
+            showsByPeriod.get(show.getPeriodType()).add(show);
+        }
+        
+        for (Integer period : showsByPeriod.keySet()) {
+            String periodName;
+            switch(period) {
+                case 1:
+                    periodName = "Ежедневные";
+                    break;
+                case 2:
+                    periodName = "Еженедельные";
+                    break;
+                case 3:
+                    periodName = "Ежемесячные";
+                    break;
+                default:
+                    periodName = "Другие";
+            }
+            System.out.println("\n" + periodName + " передачи:");
+            for (Show show : showsByPeriod.get(period)) {
+                System.out.println("  - " + show.getName() + " (" + show.getTime() + ")");
+            }
+        }
+    }
+}
