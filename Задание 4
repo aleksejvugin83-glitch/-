@@ -1,0 +1,303 @@
+import java.util.ArrayList;
+import java.util.List;
+// Родительский класс Студент
+class Student {
+    protected String recordBookNumber;  // номер зачетной книжки
+    protected String lastName;          // фамилия
+    protected String firstName;         // имя
+    protected String group;             // группа
+    protected String department;        // кафедра
+    protected String discipline;        // дисциплина
+    protected int mark;                 // оценка
+    protected String teacherLastName;   // фамилия преподавателя
+    
+    // Конструктор
+    public Student(String recordBookNumber, String lastName, String firstName, 
+                   String group, String department, String discipline, 
+                   int mark, String teacherLastName) {
+        this.recordBookNumber = recordBookNumber;
+        this.lastName = lastName;
+        this.firstName = firstName;
+        this.group = group;
+        this.department = department;
+        this.discipline = discipline;
+        this.mark = mark;
+        this.teacherLastName = teacherLastName;
+    }
+    
+    // Геттеры
+    public String getRecordBookNumber() { return recordBookNumber; }
+    public String getLastName() { return lastName; }
+    public String getFirstName() { return firstName; }
+    public String getGroup() { return group; }
+    public String getDepartment() { return department; }
+    public String getDiscipline() { return discipline; }
+    public int getMark() { return mark; }
+    public String getTeacherLastName() { return teacherLastName; }
+    
+    // Сеттеры
+    public void setRecordBookNumber(String recordBookNumber) { this.recordBookNumber = recordBookNumber; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
+    public void setGroup(String group) { this.group = group; }
+    public void setDepartment(String department) { this.department = department; }
+    public void setDiscipline(String discipline) { this.discipline = discipline; }
+    public void setMark(int mark) { this.mark = mark; }
+    public void setTeacherLastName(String teacherLastName) { this.teacherLastName = teacherLastName; }
+    
+    // Метод для вывода информации
+    public void printInfo() {
+        System.out.println("Зачетная книжка: " + recordBookNumber);
+        System.out.println("ФИО: " + lastName + " " + firstName);
+        System.out.println("Группа: " + group);
+        System.out.println("Кафедра: " + department);
+        System.out.println("Дисциплина: " + discipline);
+        System.out.println("Оценка: " + mark);
+        System.out.println("Преподаватель: " + teacherLastName);
+    }
+}
+// Дочерний класс Очное отделение
+class FullTimeStudent extends Student {
+    private int egeScore;             // балл ЕГЭ
+    private double averageDiplomaScore; // средний балл аттестата
+    
+    public FullTimeStudent(String recordBookNumber, String lastName, String firstName,
+                          String group, String department, String discipline,
+                          int mark, String teacherLastName,
+                          int egeScore, double averageDiplomaScore) {
+        super(recordBookNumber, lastName, firstName, group, department, 
+              discipline, mark, teacherLastName);
+        this.egeScore = egeScore;
+        this.averageDiplomaScore = averageDiplomaScore;
+    }
+    
+    public int getEgeScore() { return egeScore; }
+    public double getAverageDiplomaScore() { return averageDiplomaScore; }
+    
+    public void setEgeScore(int egeScore) { this.egeScore = egeScore; }
+    public void setAverageDiplomaScore(double averageDiplomaScore) { this.averageDiplomaScore = averageDiplomaScore; }
+    
+    @Override
+    public void printInfo() {
+        super.printInfo();
+        System.out.println("Форма обучения: Очное отделение");
+        System.out.println("Балл ЕГЭ: " + egeScore);
+        System.out.println("Средний балл аттестата: " + averageDiplomaScore);
+        System.out.println("---------------------------");
+    }
+}
+// Дочерний класс Заочное отделение
+class PartTimeStudent extends Student {
+    private String workplace;    // место работы
+    private String position;     // должность
+    private double tuitionFee;   // сумма обучения
+    
+    public PartTimeStudent(String recordBookNumber, String lastName, String firstName,
+                          String group, String department, String discipline,
+                          int mark, String teacherLastName,
+                          String workplace, String position, double tuitionFee) {
+        super(recordBookNumber, lastName, firstName, group, department,
+              discipline, mark, teacherLastName);
+        this.workplace = workplace;
+        this.position = position;
+        this.tuitionFee = tuitionFee;
+    }
+    
+    public String getWorkplace() { return workplace; }
+    public String getPosition() { return position; }
+    public double getTuitionFee() { return tuitionFee; }
+    
+    public void setWorkplace(String workplace) { this.workplace = workplace; }
+    public void setPosition(String position) { this.position = position; }
+    public void setTuitionFee(double tuitionFee) { this.tuitionFee = tuitionFee; }
+    
+    @Override
+    public void printInfo() {
+        super.printInfo();
+        System.out.println("Форма обучения: Заочное отделение");
+        System.out.println("Место работы: " + workplace);
+        System.out.println("Должность: " + position);
+        System.out.println("Сумма обучения: " + tuitionFee + " руб.");
+        System.out.println("---------------------------");
+    }
+}
+// Дочерний класс Целевое обучение
+class TargetedStudent extends Student {
+    private String targetCompany;  // название целевого предприятия
+    private double tuitionFee;     // сумма обучения
+    
+    public TargetedStudent(String recordBookNumber, String lastName, String firstName,
+                          String group, String department, String discipline,
+                          int mark, String teacherLastName,
+                          String targetCompany, double tuitionFee) {
+        super(recordBookNumber, lastName, firstName, group, department,
+              discipline, mark, teacherLastName);
+        this.targetCompany = targetCompany;
+        this.tuitionFee = tuitionFee;
+    }
+    
+    public String getTargetCompany() { return targetCompany; }
+    public double getTuitionFee() { return tuitionFee; }
+    
+    public void setTargetCompany(String targetCompany) { this.targetCompany = targetCompany; }
+    public void setTuitionFee(double tuitionFee) { this.tuitionFee = tuitionFee; }
+    
+    @Override
+    public void printInfo() {
+        super.printInfo();
+        System.out.println("Форма обучения: Целевое обучение");
+        System.out.println("Целевое предприятие: " + targetCompany);
+        System.out.println("Сумма обучения: " + tuitionFee + " руб.");
+        System.out.println("---------------------------");
+    }
+}
+// Класс для хранения списка студентов
+class StudentList {
+    private List<Student> students;
+    
+    public StudentList() {
+        this.students = new ArrayList<>();
+    }
+    
+    // Метод добавления нового студента
+    public void addStudent(Student student) {
+        students.add(student);
+        System.out.println("Студент " + student.getLastName() + " " + 
+                          student.getFirstName() + " добавлен в список.");
+    }
+    
+    // Метод печати списка всех студентов
+    public void printAllStudents() {
+        System.out.println("\n=== СПИСОК ВСЕХ СТУДЕНТОВ ===");
+        System.out.println("Всего студентов: " + students.size());
+        System.out.println("==============================\n");
+        
+        if (students.isEmpty()) {
+            System.out.println("Список студентов пуст.");
+            return;
+        }
+        
+        for (int i = 0; i < students.size(); i++) {
+            System.out.println("Студент №" + (i + 1) + ":");
+            students.get(i).printInfo();
+        }
+    }
+    
+    // Дополнительные методы для работы со списком
+    
+    // Печать студентов определенной формы обучения
+    public void printStudentsByType(String type) {
+        System.out.println("\n=== СТУДЕНТЫ (" + type + ") ===");
+        int count = 0;
+        
+        for (Student student : students) {
+            if (type.equals("Очное отделение") && student instanceof FullTimeStudent) {
+                student.printInfo();
+                count++;
+            } else if (type.equals("Заочное отделение") && student instanceof PartTimeStudent) {
+                student.printInfo();
+                count++;
+            } else if (type.equals("Целевое обучение") && student instanceof TargetedStudent) {
+                student.printInfo();
+                count++;
+            }
+        }
+        
+        if (count == 0) {
+            System.out.println("Студентов с формой обучения '" + type + "' не найдено.");
+        } else {
+            System.out.println("Найдено студентов: " + count);
+        }
+    }
+    
+    // Поиск студента по номеру зачетной книжки
+    public Student findStudentByRecordBook(String recordBookNumber) {
+        for (Student student : students) {
+            if (student.getRecordBookNumber().equals(recordBookNumber)) {
+                return student;
+            }
+        }
+        return null;
+    }
+    
+    // Получение количества студентов
+    public int getStudentCount() {
+        return students.size();
+    }
+}
+// Демонстрационный класс
+public class UniversityStudentSystem {
+    public static void main(String[] args) {
+        // Создаем объект для хранения списка студентов
+        StudentList studentList = new StudentList();
+        
+        // Создаем студентов разных форм обучения
+        FullTimeStudent student1 = new FullTimeStudent(
+            "2023-001", "Иванов", "Иван", "ИВТ-101", 
+            "Информационные технологии", "Программирование", 
+            5, "Петров", 275, 4.8
+        );
+        
+        FullTimeStudent student2 = new FullTimeStudent(
+            "2023-002", "Смирнова", "Анна", "ИВТ-102",
+            "Информационные технологии", "Математика",
+            4, "Сидоров", 265, 4.6
+        );
+        
+        PartTimeStudent student3 = new PartTimeStudent(
+            "2023-101", "Козлов", "Сергей", "ЗИВТ-201",
+            "Экономика", "Статистика",
+            4, "Волкова", "ООО 'Технологии'", "Инженер", 45000.0
+        );
+        
+        TargetedStudent student4 = new TargetedStudent(
+            "2023-301", "Новикова", "Мария", "ЦИВТ-301",
+            "Менеджмент", "Маркетинг",
+            5, "Федорова", "Газпром", 50000.0
+        );
+        
+        PartTimeStudent student5 = new PartTimeStudent(
+            "2023-102", "Васильев", "Алексей", "ЗИВТ-202",
+            "Право", "Гражданское право",
+            3, "Морозов", "Адвокатское бюро", "Юрист", 55000.0
+        );
+        
+        // Добавляем студентов в список
+        studentList.addStudent(student1);
+        studentList.addStudent(student2);
+        studentList.addStudent(student3);
+        studentList.addStudent(student4);
+        studentList.addStudent(student5);
+        
+        // Печатаем всех студентов
+        studentList.printAllStudents();
+        
+        // Печатаем студентов по типам обучения
+        studentList.printStudentsByType("Очное отделение");
+        studentList.printStudentsByType("Заочное отделение");
+        studentList.printStudentsByType("Целевое обучение");
+        
+        // Поиск студента по номеру зачетки
+        System.out.println("\n=== ПОИСК СТУДЕНТА ===");
+        Student foundStudent = studentList.findStudentByRecordBook("2023-001");
+        if (foundStudent != null) {
+            System.out.println("Студент найден:");
+            foundStudent.printInfo();
+        } else {
+            System.out.println("Студент не найден.");
+        }
+        
+        // Общая статистика
+        System.out.println("\n=== СТАТИСТИКА ===");
+        System.out.println("Всего студентов в системе: " + studentList.getStudentCount());
+        
+        // Пример изменения данных студента
+        System.out.println("\n=== ИЗМЕНЕНИЕ ДАННЫХ СТУДЕНТА ===");
+        student1.setMark(5);
+        student1.setDiscipline("Базы данных");
+        System.out.println("Данные студента Иванов Иван обновлены.");
+        
+        // Проверяем изменения
+        studentList.printStudentsByType("Очное отделение");
+    }
+}
