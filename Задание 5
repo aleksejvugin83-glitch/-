@@ -1,0 +1,369 @@
+from typing import List, Dict, Any
+from dataclasses import dataclass, field
+from datetime import date
+import json
+import os
+
+@dataclass(order=True)
+class Book:
+    """Класс, представляющий книгу в библиотеке"""
+    title: str
+    author: str
+    year: int
+    isbn: str
+    pages: int
+    genre: str = field(default="Не указан")
+    is_available: bool = field(default=True)
+    
+    def __post_init__(self):
+        """Валидация данных после инициализации"""
+        if self.year < 0 or self.year > date.today().year:
+            raise ValueError(f"Некорректный год: {self.year}")
+        if self.pages <= 0:
+            raise ValueError(f"Некорректное количество страниц: {self.pages}")
+
+class LibraryCollection:
+    """Коллекция для хранения и управления книгами"""
+    
+    def __init__(self, filename: str = "library_data.json"):
+        self.books: List[Book] = []
+        self.filename = filename
+        self.load_from_file()
+    
+    def add_book(self, book: Book) -> None:
+        """Добавление книги в коллекцию"""
+        self.books.append(book)
+        print(f"Книга '{book.title}' успешно добавлена!")
+    
+    def add_book_interactive(self) -> None:
+        """Интерактивное добавление книги через пользовательский ввод"""
+        print("\n" + "="*50)
+        print("ДОБАВЛЕНИЕ НОВОЙ КНИГИ")
+        print("="*50)
+        
+        try:
+            title = input("Введите название книги: ").strip()
+            author = input("Введите автора: ").strip()
+            year = int(input("Введите год издания: "))
+            isbn = input("Введите ISBN: ").strip()
+            pages = int(input("Введите количество страниц: "))
+            genre = input("Введите жанр (или Enter для пропуска): ").strip()
+            
+            if not title or not author or not isbn:
+                print("Ошибка: Название, автор и ISBN обязательны!")
+                return
+            
+            book = Book(
+                title=title,
+                author=author,
+                year=year,
+                isbn=isbn,
+                pages=pages,
+                genre=genre if genre else "Не указан"
+            )
+            
+            self.add_book(book)
+            self.save_to_file()
+            
+        except ValueError as e:
+            print(f"Ошибка ввода данных: {e}")
+        except Exception as e:
+            print(f"Произошла ошибка: {e}")
+    
+    def display_books(self, books_list: List[Book] = None) -> None:
+        """Вывод списка книг на экран"""
+        books_to_display = books_list if books_list else self.books
+        
+        if not books_to_display:
+            print("\nКоллекция книг пуста!")
+            return
+        
+        print("\n" + "="*80)
+        print(f"{'№':<3} {'Название':<25} {'Автор':<20} {'Год':<6} {'Жанр':<15} {'Доступна':<10}")
+        print("="*80)
+        
+        for i, book in enumerate(books_to_display, 1):
+            status = "✓" if book.is_available else "✗"
+            print(f"{i:<3} {book.title[:23]:<25} {book.author[:18]:<20} "
+                  f"{book.year:<6} {book.genre[:13]:<15} {status:<10}")
+    
+    def sort_books(self, sort_by: str = "title") -> List[Book]:
+        """Сортировка книг по различным критериям"""
+        sort_options = {
+            "1": ("title", "по названию"),
+            "2": ("author", "по автору"),
+            "3": ("year", "по году издания"),
+            "4": ("pages", "по количеству страниц"),
+            "5": ("genre", "по жанру")
+        }
+        
+        if sort_by in sort_options:
+            key, description = sort_options[sort_by]
+        else:
+            key, description = "title", "по названию"
+        
+        sorted_books = sorted(self.books, key=lambda x: getattr(x, key))
+        print(f"\nКниги отсортированы {description}:")
+        return sorted_books
+    
+    def search_books(self, search_term: str, search_by: str = "title") -> List[Book]:
+        """Поиск книг по различным критериям"""
+        search_term = search_term.lower()
+        
+        if search_by == "title":
+            return [book for book in self.books if search_term in book.title.lower()]
+        elif search_by == "author":
+            return [book for book in self.books if search_term in book.author.lower()]
+        elif search_by == "genre":
+            return [book for book in self.books if search_term in book.genre.lower()]
+        elif search_by == "year":
+            try:
+                year = int(search_term)
+                return [book for book in self.books if book.year == year]
+            except ValueError:
+                return []
+        return []
+    
+    def save_to_file(self) -> None:
+        """Сохранение коллекции в JSON файл"""
+        try:
+            data = []
+            for book in self.books:
+                data.append({
+                    "title": book.title,
+                    "author": book.author,
+                    "year": book.year,
+                    "isbn": book.isbn,
+                    "pages": book.pages,
+                    "genre": book.genre,
+                    "is_available": book.is_available
+                })
+            
+            with open(self.filename, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            
+            print(f"\nДанные сохранены в файл: {self.filename}")
+            
+        except Exception as e:
+            print(f"Ошибка при сохранении файла: {e}")
+    
+    def load_from_file(self) -> None:
+        """Загрузка коллекции из JSON файла"""
+        if not os.path.exists(self.filename):
+            print(f"Файл {self.filename} не найден. Создана новая коллекция.")
+            return
+        
+        try:
+            with open(self.filename, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            self.books.clear()
+            for item in data:
+                book = Book(
+                    title=item["title"],
+                    author=item["author"],
+                    year=item["year"],
+                    isbn=item["isbn"],
+                    pages=item["pages"],
+                    genre=item["genre"],
+                    is_available=item.get("is_available", True)
+                )
+                self.books.append(book)
+            
+            print(f"\nЗагружено {len(self.books)} книг из файла {self.filename}")
+            
+        except Exception as e:
+            print(f"Ошибка при загрузке файла: {e}")
+
+class Menu:
+    """Класс для управления пользовательским меню"""
+    
+    def __init__(self, collection: LibraryCollection):
+        self.collection = collection
+        self.running = True
+    
+    def display_menu(self) -> None:
+        """Отображение главного меню"""
+        print("\n" + "="*50)
+        print("БИБЛИОТЕЧНАЯ КОЛЛЕКЦИЯ - ГЛАВНОЕ МЕНЮ")
+        print("="*50)
+        print("1. Показать все книги")
+        print("2. Добавить новую книгу")
+        print("3. Отсортировать книги")
+        print("4. Поиск книг")
+        print("5. Статистика коллекции")
+        print("6. Сохранить коллекцию")
+        print("7. Загрузить коллекцию")
+        print("8. Выход")
+        print("="*50)
+    
+    def handle_choice(self, choice: str) -> None:
+        """Обработка выбора пользователя"""
+        if choice == "1":
+            self.collection.display_books()
+        
+        elif choice == "2":
+            self.collection.add_book_interactive()
+        
+        elif choice == "3":
+            self.show_sort_menu()
+        
+        elif choice == "4":
+            self.show_search_menu()
+        
+        elif choice == "5":
+            self.show_statistics()
+        
+        elif choice == "6":
+            self.collection.save_to_file()
+        
+        elif choice == "7":
+            self.collection.load_from_file()
+        
+        elif choice == "8":
+            print("\nСохранение данных и выход...")
+            self.collection.save_to_file()
+            self.running = False
+        
+        else:
+            print("\nНеверный выбор. Пожалуйста, выберите пункт от 1 до 8.")
+    
+    def show_sort_menu(self) -> None:
+        """Меню сортировки"""
+        print("\n" + "="*50)
+        print("СОРТИРОВКА КНИГ")
+        print("="*50)
+        print("1. По названию")
+        print("2. По автору")
+        print("3. По году издания")
+        print("4. По количеству страниц")
+        print("5. По жанру")
+        print("6. Назад в главное меню")
+        
+        choice = input("\nВыберите вариант сортировки (1-6): ").strip()
+        
+        if choice in ["1", "2", "3", "4", "5"]:
+            sorted_books = self.collection.sort_books(choice)
+            self.collection.display_books(sorted_books)
+        elif choice == "6":
+            return
+        else:
+            print("Неверный выбор!")
+    
+    def show_search_menu(self) -> None:
+        """Меню поиска"""
+        print("\n" + "="*50)
+        print("ПОИСК КНИГ")
+        print("="*50)
+        print("1. По названию")
+        print("2. По автору")
+        print("3. По жанру")
+        print("4. По году")
+        print("5. Назад в главное меню")
+        
+        choice = input("\nВыберите вариант поиска (1-5): ").strip()
+        
+        if choice == "5":
+            return
+        
+        search_by_map = {"1": "title", "2": "author", "3": "genre", "4": "year"}
+        
+        if choice in search_by_map:
+            search_term = input("Введите поисковый запрос: ").strip()
+            if search_term:
+                results = self.collection.search_books(search_term, search_by_map[choice])
+                if results:
+                    print(f"\nНайдено {len(results)} книг:")
+                    self.collection.display_books(results)
+                else:
+                    print("\nКниги не найдены.")
+            else:
+                print("Поисковый запрос не может быть пустым!")
+        else:
+            print("Неверный выбор!")
+    
+    def show_statistics(self) -> None:
+        """Показать статистику коллекции"""
+        if not self.collection.books:
+            print("\nКоллекция пуста!")
+            return
+        
+        total_books = len(self.collection.books)
+        available_books = sum(1 for book in self.collection.books if book.is_available)
+        total_pages = sum(book.pages for book in self.collection.books)
+        avg_pages = total_pages / total_books if total_books > 0 else 0
+        
+        # Самые старые и новые книги
+        oldest_book = min(self.collection.books, key=lambda x: x.year)
+        newest_book = max(self.collection.books, key=lambda x: x.year)
+        
+        # Самые популярные авторы
+        authors = {}
+        for book in self.collection.books:
+            authors[book.author] = authors.get(book.author, 0) + 1
+        most_common_author = max(authors.items(), key=lambda x: x[1]) if authors else ("Нет данных", 0)
+        
+        print("\n" + "="*50)
+        print("СТАТИСТИКА КОЛЛЕКЦИИ")
+        print("="*50)
+        print(f"Всего книг: {total_books}")
+        print(f"Доступно книг: {available_books}")
+        print(f"Недоступно книг: {total_books - available_books}")
+        print(f"Общее количество страниц: {total_pages}")
+        print(f"Среднее количество страниц: {avg_pages:.1f}")
+        print(f"Самая старая книга: '{oldest_book.title}' ({oldest_book.year} г.)")
+        print(f"Самая новая книга: '{newest_book.title}' ({newest_book.year} г.)")
+        print(f"Самый популярный автор: {most_common_author[0]} ({most_common_author[1]} книг)")
+        print("="*50)
+    
+    def run(self) -> None:
+        """Запуск главного цикла меню"""
+        print("Добро пожаловать в систему управления библиотечной коллекцией!")
+        
+        while self.running:
+            self.display_menu()
+            choice = input("\nВыберите действие (1-8): ").strip()
+            self.handle_choice(choice)
+        
+        print("До свидания!")
+
+def create_sample_data(collection: LibraryCollection) -> None:
+    """Создание тестовых данных для демонстрации"""
+    sample_books = [
+        Book("Мастер и Маргарита", "Михаил Булгаков", 1967, "978-5-699-12345-6", 480, "Роман"),
+        Book("Преступление и наказание", "Федор Достоевский", 1866, "978-5-17-123456-7", 608, "Роман"),
+        Book("1984", "Джордж Оруэлл", 1949, "978-5-389-12345-8", 320, "Антиутопия"),
+        Book("Гарри Поттер и философский камень", "Джоан Роулинг", 1997, "978-5-389-12345-9", 432, "Фэнтези"),
+        Book("Война и мир", "Лев Толстой", 1869, "978-5-17-123456-0", 1225, "Роман-эпопея"),
+        Book("Маленький принц", "Антуан де Сент-Экзюпери", 1943, "978-5-699-12345-1", 96, "Притча"),
+        Book("Улисс", "Джеймс Джойс", 1922, "978-5-389-12345-2", 736, "Модернизм"),
+    ]
+    
+    for book in sample_books:
+        collection.add_book(book)
+    
+    print("Создана демонстрационная коллекция книг!")
+
+def main():
+    """Основная функция программы"""
+    # Создаем коллекцию книг
+    library = LibraryCollection()
+    
+    # Создаем меню
+    menu = Menu(library)
+    
+    # Запрашиваем у пользователя, хочет ли он создать демо-данные
+    print("="*50)
+    print("СИСТЕМА УПРАВЛЕНИЯ БИБЛИОТЕЧНОЙ КОЛЛЕКЦИЕЙ")
+    print("="*50)
+    
+    demo_choice = input("Создать демонстрационную коллекцию книг? (да/нет): ").strip().lower()
+    
+    if demo_choice in ['да', 'д', 'yes', 'y']:
+        create_sample_data(library)
+    
+    # Запускаем меню
+    menu.run()
+
+if __name__ == "__main__":
+    main()
