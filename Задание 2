@@ -1,0 +1,192 @@
+import random
+# Параметры матрицы
+ROWS = 5
+COLS = 6
+MIN_VALUE = -10
+MAX_VALUE = 20
+TARGET_VALUE = 5  # для заданий 7 и 8
+# Генерация случайной матрицы
+matrix = [[random.randint(MIN_VALUE, MAX_VALUE) for _ in range(COLS)] for _ in range(ROWS)]
+print("Исходная матрица:")
+for row in matrix:
+    print("[", end="")
+    for val in row:
+        print(f"{val:4}", end="")
+    print("]")
+print()
+# 1) Число неотрицательных элементов в i-й строке
+def count_non_negative_in_row(row_index):
+    row = matrix[row_index]
+    count = sum(1 for val in row if val >= 0)
+    return count
+print("1) Число неотрицательных элементов в каждой строке:")
+for i in range(ROWS):
+    count = count_non_negative_in_row(i)
+    print(f"  Строка {i}: {count} элементов")
+print()
+# 2) Среднее арифметическое положительных элементов в i-м столбце
+def avg_positive_in_col(col_index):
+    positive_vals = [matrix[row][col_index] for row in range(ROWS) if matrix[row][col_index] > 0]
+    if not positive_vals:
+        return 0
+    return sum(positive_vals) / len(positive_vals)
+print("2) Среднее арифметическое положительных элементов в каждом столбце:")
+for j in range(COLS):
+    avg = avg_positive_in_col(j)
+    print(f"  Столбец {j}: {avg:.2f}")
+print()
+# 3) Минимальное значение в i-й строке
+def min_in_row(row_index):
+    row = matrix[row_index]
+    return min(row)
+print("3) Минимальное значение в каждой строке:")
+for i in range(ROWS):
+    min_val = min_in_row(i)
+    print(f"  Строка {i}: {min_val}")
+print()
+# 4) Максимальное значение в i-м столбце
+def max_in_col(col_index):
+    col_vals = [matrix[row][col_index] for row in range(ROWS)]
+    return max(col_vals)
+print("4) Максимальное значение в каждом столбце:")
+for j in range(COLS):
+    max_val = max_in_col(j)
+    print(f"  Столбец {j}: {max_val}")
+print()
+# 5) Номер максимального значения в i-й строке
+def max_index_in_row(row_index):
+    row = matrix[row_index]
+    max_val = max(row)
+    return row.index(max_val)
+print("5) Номер максимального значения в каждой строке:")
+for i in range(ROWS):
+    max_idx = max_index_in_row(i)
+    print(f"  Строка {i}: индекс {max_idx} (значение {matrix[i][max_idx]})")
+print()
+# 6) Номер минимального значения в i-м столбце
+def min_index_in_col(col_index):
+    col_vals = [matrix[row][col_index] for row in range(ROWS)]
+    min_val = min(col_vals)
+    return col_vals.index(min_val)
+print("6) Номер минимального значения в каждом столбце:")
+for j in range(COLS):
+    min_idx = min_index_in_col(j)
+    print(f"  Столбец {j}: строка {min_idx} (значение {matrix[min_idx][j]})")
+print()
+# 7) Число элементов i-й строки, значения которых меньше заданного значения
+def count_less_than_in_row(row_index, target):
+    row = matrix[row_index]
+    count = sum(1 for val in row if val < target)
+    return count
+print(f"7) Число элементов меньше {TARGET_VALUE} в каждой строке:")
+for i in range(ROWS):
+    count = count_less_than_in_row(i, TARGET_VALUE)
+    print(f"  Строка {i}: {count} элементов")
+print()
+# 8) Значение элемента матрицы, не равное заданному значению
+def find_not_equal_to(target):
+    for i in range(ROWS):
+        for j in range(COLS):
+            if matrix[i][j] != target:
+                return matrix[i][j], i, j
+    return None, -1, -1
+print(f"8) Первое значение, не равное {TARGET_VALUE}:")
+value, row_idx, col_idx = find_not_equal_to(TARGET_VALUE)
+if value is not None:
+    print(f"  Значение: {value} в позиции ({row_idx}, {col_idx})")
+else:
+    print(f"  Все элементы равны {TARGET_VALUE}")
+print()
+# 9) Равно 1, если значения элементов i-й строки упорядочены по возрастанию, и 0, в противном случае
+def is_sorted_asc(row_index):
+    row = matrix[row_index]
+    for i in range(len(row) - 1):
+        if row[i] > row[i + 1]:
+            return 0
+    return 1
+print("9) Проверка упорядоченности строк по возрастанию:")
+for i in range(ROWS):
+    result = is_sorted_asc(i)
+    print(f"  Строка {i}: {result} ({'упорядочена' if result == 1 else 'не упорядочена'})")
+print()
+# 10) Количество четных чисел в i-й строке
+def count_even_in_row(row_index):
+    row = matrix[row_index]
+    count = sum(1 for val in row if val % 2 == 0)
+    return count
+print("10) Количество четных чисел в каждой строке:")
+for i in range(ROWS):
+    count = count_even_in_row(i)
+    print(f"  Строка {i}: {count} чисел")
+print()
+# 11) Сумма положительных элементов в каждом столбце матрицы
+def sum_positive_in_col(col_index):
+    total = 0
+    for row in range(ROWS):
+        val = matrix[row][col_index]
+        if val > 0:
+            total += val
+    return total
+print("11) Сумма положительных элементов в каждом столбце:")
+for j in range(COLS):
+    total = sum_positive_in_col(j)
+    print(f"  Столбец {j}: {total}")
+print()
+# 12) Произведение положительных элементов в каждом столбце матрицы
+def product_positive_in_col(col_index):
+    product = 1
+    has_positive = False
+    for row in range(ROWS):
+        val = matrix[row][col_index]
+        if val > 0:
+            product *= val
+            has_positive = True
+    return product if has_positive else 0
+print("12) Произведение положительных элементов в каждом столбце:")
+for j in range(COLS):
+    product = product_positive_in_col(j)
+    print(f"  Столбец {j}: {product}")
+print()
+# Дополнительно: вывод всех результатов в виде векторов
+print("=" * 50)
+print("Итоговые векторы:")
+print("\nВектор B1 (число неотрицательных элементов в каждой строке):")
+b1 = [count_non_negative_in_row(i) for i in range(ROWS)]
+print(b1)
+print("\nВектор B2 (среднее арифметическое положительных в каждом столбце):")
+b2 = [round(avg_positive_in_col(j), 2) for j in range(COLS)]
+print(b2)
+print("\nВектор B3 (минимальное значение в каждой строке):")
+b3 = [min_in_row(i) for i in range(ROWS)]
+print(b3)
+print("\nВектор B4 (максимальное значение в каждом столбце):")
+b4 = [max_in_col(j) for j in range(COLS)]
+print(b4)
+print("\nВектор B5 (номер максимального значения в каждой строке):")
+b5 = [max_index_in_row(i) for i in range(ROWS)]
+print(b5)
+print("\nВектор B6 (номер минимального значения в каждом столбце):")
+b6 = [min_index_in_col(j) for j in range(COLS)]
+print(b6)
+print(f"\nВектор B7 (число элементов меньше {TARGET_VALUE} в каждой строке):")
+b7 = [count_less_than_in_row(i, TARGET_VALUE) for i in range(ROWS)]
+print(b7)
+print("\nВектор B8 (значение элемента, не равное заданному):")
+# Для этого задания вектор состоит из одного элемента
+value, row_idx, col_idx = find_not_equal_to(TARGET_VALUE)
+if value is not None:
+    print(f"  [{value}] в позиции ({row_idx}, {col_idx})")
+else:
+    print(f"  [Все элементы равны {TARGET_VALUE}]")
+print("\nВектор B9 (упорядоченность строк по возрастанию):")
+b9 = [is_sorted_asc(i) for i in range(ROWS)]
+print(b9)
+print("\nВектор B10 (количество четных чисел в каждой строке):")
+b10 = [count_even_in_row(i) for i in range(ROWS)]
+print(b10)
+print("\nВектор B11 (сумма положительных элементов в каждом столбце):")
+b11 = [sum_positive_in_col(j) for j in range(COLS)]
+print(b11)
+print("\nВектор B12 (произведение положительных элементов в каждом столбце):")
+b12 = [product_positive_in_col(j) for j in range(COLS)]
+print(b12)
