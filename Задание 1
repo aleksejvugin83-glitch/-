@@ -1,0 +1,147 @@
+import random
+from collections import Counter
+# Константы для заданий
+TARGET_VALUE = 5           # для заданий 1 и 3
+N_MAX_VALUES = 3           # для задания 6
+ALLOWED_VALUES = [2, 5, 8, 10]  # для заданий 4 и 5
+ARRAY_SIZE = 15            # размер массива
+MIN_VALUE = 1              # минимальное значение
+MAX_VALUE = 10             # максимальное значение
+# 1. Генерация случайного массива
+array = [random.randint(MIN_VALUE, MAX_VALUE) for _ in range(ARRAY_SIZE)]
+print("Исходный массив:")
+print(array)
+print()
+# 1) Составить и вывести на экран новый массив с номерами элементов исходного массива, которые равны заданному значению
+def task1(arr):
+    print("1) Номера элементов, равных", TARGET_VALUE, ":")
+    indices = [i for i, val in enumerate(arr) if val == TARGET_VALUE]
+    if indices:
+        print("Номера:", indices)
+    else:
+        print("Таких элементов нет")
+    print()
+# 2) Поменять местами максимальный и минимальный элементы массива
+def task2(arr):
+    arr_copy = arr.copy()
+    min_index = arr_copy.index(min(arr_copy))
+    max_index = arr_copy.index(max(arr_copy))
+    
+    arr_copy[min_index], arr_copy[max_index] = arr_copy[max_index], arr_copy[min_index]
+    
+    print("2) После замены max и min элементов:")
+    print("Максимум был на позиции", max_index, ", минимум на позиции", min_index)
+    print("Измененный массив:", arr_copy)
+    print()
+# 3) Все элементы массива, меньшие заданного значения, и их номера записать в новые массивы
+def task3(arr):
+    print("3) Элементы меньше", TARGET_VALUE, "и их номера:")
+    values = [val for val in arr if val < TARGET_VALUE]
+    indices = [i for i, val in enumerate(arr) if val < TARGET_VALUE]
+    
+    if values:
+        print("Значения:", values)
+        print("Номера:", indices)
+    else:
+        print("Таких элементов нет")
+    print()
+# 4) Определить дополнительный массив разрешенных значений. 
+#    Определить и вывести на экран, сколько элементов исходного массива имеют разрешенные значения
+def task4(arr):
+    print("4) Подсчет элементов с разрешенными значениями:")
+    print("Разрешенные значения:", ALLOWED_VALUES)
+    
+    count = sum(1 for val in arr if val in ALLOWED_VALUES)
+    print("Количество элементов с разрешенными значениями:", count)
+    print()
+# 5) Определить дополнительный массив разрешенных значений. 
+#    Составить массив из элементов исходного массива, имеющих неразрешенные значения
+def task5(arr):
+    print("5) Элементы с неразрешенными значениями:")
+    not_allowed = [val for val in arr if val not in ALLOWED_VALUES]
+    
+    if not_allowed:
+        print("Элементы:", not_allowed)
+    else:
+        print("Все элементы имеют разрешенные значения")
+    print()
+# 6) Составить и вывести на экран массив с N максимальными значениями исходного массива
+def task6(arr):
+    print("6)", N_MAX_VALUES, "максимальных значения:")
+    sorted_arr = sorted(arr, reverse=True)
+    max_values = sorted_arr[:N_MAX_VALUES]
+    print("Максимальные значения:", max_values)
+    print()
+# 7) Переписать элементы массива в обратном порядке на том же месте
+def task7(arr):
+    arr_copy = arr.copy()
+    arr_copy.reverse()
+    print("7) Массив в обратном порядке:")
+    print(arr_copy)
+    print()
+# 8) Определить дополнительный массив, состоящий из неповторяющихся элементов исходного массива
+def task8(arr):
+    print("8) Неповторяющиеся элементы:")
+    counts = Counter(arr)
+    unique_values = [val for val, count in counts.items() if count == 1]
+    
+    if unique_values:
+        print("Уникальные значения:", sorted(unique_values))
+    else:
+        print("Неповторяющихся элементов нет")
+    print()
+# 9) Составить и вывести на экран массив номеров элементов исходного массива, встречающихся один раз
+def task9(arr):
+    print("9) Номера элементов, встречающихся один раз:")
+    counts = Counter(arr)
+    indices = [i for i, val in enumerate(arr) if counts[val] == 1]
+    
+    if indices:
+        print("Номера:", indices)
+    else:
+        print("Таких элементов нет")
+    print()
+# 10) Определить дополнительный массив, состоящий из повторяющихся элементов исходного массива
+def task10(arr):
+    print("10) Повторяющиеся элементы:")
+    counts = Counter(arr)
+    duplicate_values = [val for val, count in counts.items() if count > 1]
+    
+    if duplicate_values:
+        print("Повторяющиеся значения:", sorted(duplicate_values))
+    else:
+        print("Повторяющихся элементов нет")
+    print()
+# 11) Вычислить сколько элементов данного массива больше своего предыдущего элемента
+def task11(arr):
+    print("11) Элементы, большие предыдущего:")
+    count = sum(1 for i in range(1, len(arr)) if arr[i] > arr[i-1])
+    indices = [i for i in range(1, len(arr)) if arr[i] > arr[i-1]]
+    
+    print("Количество:", count)
+    if indices:
+        print("Номера таких элементов:", indices)
+    print()
+# 12) Найти максимальный элемент в одномерном массиве х. 
+#     Затем каждый элемент в массиве разделить на максимальный элемент
+def task12(arr):
+    print("12) Деление каждого элемента на максимальный:")
+    max_val = max(arr)
+    print("Максимальный элемент:", max_val)
+    
+    divided_array = [val / max_val for val in arr]
+    print("Результат деления:", [round(x, 3) for x in divided_array])
+    print()
+# Выполнение всех заданий
+task1(array)
+task2(array)
+task3(array)
+task4(array)
+task5(array)
+task6(array)
+task7(array)
+task8(array)
+task9(array)
+task10(array)
+task11(array)
+task12(array)
