@@ -1,0 +1,347 @@
+import java.io.Serializable;
+
+public class Student implements Serializable {
+    private int id;
+    private String name;
+    private int age;
+    
+    public Student(int id, String name, int age) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+    }
+    
+    // Геттеры и сеттеры
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+    
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    
+    public int getAge() { return age; }
+    public void setAge(int age) { this.age = age; }
+    
+    @Override
+    public String toString() {
+        return String.format("Student{id=%d, name='%s', age=%d}", id, name, age);
+    }
+    
+    // Метод для сохранения в текстовом формате
+    public String toFileString() {
+        return String.format("%d;%s;%d", id, name, age);
+    }
+    
+    // Метод для загрузки из текстовой строки
+    public static Student fromFileString(String line) {
+        String[] parts = line.split(";");
+        if (parts.length != 3) {
+            throw new IllegalArgumentException("Некорректный формат строки: " + line);
+        }
+        int id = Integer.parseInt(parts[0]);
+        String name = parts[1];
+        int age = Integer.parseInt(parts[2]);
+        return new Student(id, name, age);
+    }
+}
+
+
+*********************************************************
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class StudentManager {
+    private List<Student> students;
+    private String currentFileName;
+    
+    public StudentManager() {
+        students = new ArrayList<>();
+        currentFileName = "students.txt";
+    }
+    
+    // Добавление студента
+    public void addStudent(Student student) {
+        students.add(student);
+    }
+    
+    // Получение всех студентов
+    public List<Student> getAllStudents() {
+        return new ArrayList<>(students);
+    }
+    
+    // Сохранение в текстовый файл
+    public boolean saveToFile(String fileName) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            for (Student student : students) {
+                writer.write(student.toFileString());
+                writer.newLine();
+            }
+            currentFileName = fileName;
+            System.out.println("Данные успешно сохранены в файл: " + fileName);
+            return true;
+        } catch (IOException e) {
+            System.err.println("Ошибка при сохранении в файл: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    // Загрузка из текстового файла
+    public boolean loadFromFile(String fileName) {
+        List<Student> loadedStudents = new ArrayList<>();
+        
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            int lineNumber = 0;
+            
+            while ((line = reader.readLine()) != null) {
+                lineNumber++;
+                line = line.trim();
+                
+                // Пропускаем пустые строки
+                if (line.isEmpty()) {
+                    continue;
+                }
+                
+                try {
+                    Student student = Student.fromFileString(line);
+                    loadedStudents.add(student);
+                } catch (Exception e) {
+                    System.err.println("Ошибка в строке " + lineNumber + ": " + e.getMessage());
+                    return false;
+                }
+            }
+            
+            // Если загрузка прошла успешно, заменяем текущую коллекцию
+            students = loadedStudents;
+            currentFileName = fileName;
+            System.out.println("Данные успешно загружены из файла: " + fileName);
+            return true;
+            
+        } catch (FileNotFoundException e) {
+            System.err.println("Файл не найден: " + fileName);
+            return false;
+        } catch (IOException e) {
+            System.err.println("Ошибка при чтении файла: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    // Сохранение в текущий файл
+    public boolean save() {
+        return saveToFile(currentFileName);
+    }
+    
+    // Получение текущего имени файла
+    public String getCurrentFileName() {
+        return currentFileName;
+    }
+    
+    // Очистка коллекции
+    public void clear() {
+        students.clear();
+    }
+}
+
+************************************************
+
+
+import java.util.Scanner;
+
+public class StudentApp {
+    private StudentManager manager;
+    private Scanner scanner;
+    
+    public StudentApp() {
+        manager = new StudentManager();
+        scanner = new Scanner(System.in);
+    }
+    
+    public void run() {
+        boolean running = true;
+        
+        while (running) {
+            printMenu();
+            System.out.print("Выберите действие: ");
+            
+            try {
+                int choice = Integer.parseInt(scanner.nextLine());
+                
+                switch (choice) {
+                    case 1 -> addStudent();
+                    case 2 -> showAllStudents();
+                    case 3 -> saveToFile();
+                    case 4 -> loadFromFile();
+                    case 5 -> saveToSpecificFile();
+                    case 6 -> loadFromSpecificFile();
+                    case 7 -> showCurrentFile();
+                    case 8 -> clearCollection();
+                    case 0 -> {
+                        System.out.println("Выход из программы...");
+                        running = false;
+                    }
+                    default -> System.out.println("Неверный выбор. Попробуйте снова.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Пожалуйста, введите число.");
+            }
+        }
+        
+        scanner.close();
+    }
+    
+    private void printMenu() {
+        System.out.println("\n=== МЕНЮ УПРАВЛЕНИЯ СТУДЕНТАМИ ===");
+        System.out.println("1. Добавить студента");
+        System.out.println("2. Показать всех студентов");
+        System.out.println("3. Сохранить в текущий файл");
+        System.out.println("4. Загрузить из текущего файла");
+        System.out.println("5. Сохранить в указанный файл");
+        System.out.println("6. Загрузить из указанного файла");
+        System.out.println("7. Показать текущий файл");
+        System.out.println("8. Очистить коллекцию");
+        System.out.println("0. Выход");
+        System.out.println("=================================");
+    }
+    
+    private void addStudent() {
+        try {
+            System.out.print("Введите ID студента: ");
+            int id = Integer.parseInt(scanner.nextLine());
+            
+            System.out.print("Введите имя студента: ");
+            String name = scanner.nextLine();
+            
+            System.out.print("Введите возраст студента: ");
+            int age = Integer.parseInt(scanner.nextLine());
+            
+            Student student = new Student(id, name, age);
+            manager.addStudent(student);
+            System.out.println("Студент успешно добавлен!");
+            
+        } catch (NumberFormatException e) {
+            System.out.println("Ошибка: неверный формат числа.");
+        }
+    }
+    
+    private void showAllStudents() {
+        System.out.println("\n=== СПИСОК СТУДЕНТОВ ===");
+        var students = manager.getAllStudents();
+        
+        if (students.isEmpty()) {
+            System.out.println("Список студентов пуст.");
+        } else {
+            for (Student student : students) {
+                System.out.println(student);
+            }
+        }
+        System.out.println("========================");
+    }
+    
+    private void saveToFile() {
+        if (manager.save()) {
+            System.out.println("Данные сохранены успешно.");
+        } else {
+            System.out.println("Не удалось сохранить данные.");
+        }
+    }
+    
+    private void loadFromFile() {
+        if (manager.loadFromFile(manager.getCurrentFileName())) {
+            System.out.println("Данные загружены успешно.");
+        } else {
+            System.out.println("Не удалось загрузить данные.");
+        }
+    }
+    
+    private void saveToSpecificFile() {
+        System.out.print("Введите имя файла для сохранения: ");
+        String fileName = scanner.nextLine();
+        
+        if (manager.saveToFile(fileName)) {
+            System.out.println("Данные сохранены в файл: " + fileName);
+        } else {
+            System.out.println("Не удалось сохранить данные.");
+        }
+    }
+    
+    private void loadFromSpecificFile() {
+        System.out.print("Введите имя файла для загрузки: ");
+        String fileName = scanner.nextLine();
+        
+        if (manager.loadFromFile(fileName)) {
+            System.out.println("Данные загружены из файла: " + fileName);
+        } else {
+            System.out.println("Не удалось загрузить данные.");
+        }
+    }
+    
+    private void showCurrentFile() {
+        System.out.println("Текущий файл: " + manager.getCurrentFileName());
+    }
+    
+    private void clearCollection() {
+        System.out.print("Вы уверены, что хотите очистить коллекцию? (y/n): ");
+        String answer = scanner.nextLine();
+        
+        if (answer.equalsIgnoreCase("y")) {
+            manager.clear();
+            System.out.println("Коллекция очищена.");
+        } else {
+            System.out.println("Очистка отменена.");
+        }
+    }
+    
+    public static void main(String[] args) {
+        StudentApp app = new StudentApp();
+        app.run();
+    }
+}
+
+*******************************************
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class StudentBinaryManager {
+    private List<Student> students;
+    
+    public StudentBinaryManager() {
+        students = new ArrayList<>();
+    }
+    
+    // Сохранение в бинарный файл
+    public boolean saveBinary(String fileName) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(
+                new FileOutputStream(fileName))) {
+            oos.writeObject(students);
+            System.out.println("Данные сохранены в бинарный файл: " + fileName);
+            return true;
+        } catch (IOException e) {
+            System.err.println("Ошибка при сохранении: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    // Загрузка из бинарного файла
+    @SuppressWarnings("unchecked")
+    public boolean loadBinary(String fileName) {
+        try (ObjectInputStream ois = new ObjectInputStream(
+                new FileInputStream(fileName))) {
+            students = (List<Student>) ois.readObject();
+            System.out.println("Данные загружены из бинарного файла: " + fileName);
+            return true;
+        } catch (FileNotFoundException e) {
+            System.err.println("Файл не найден: " + fileName);
+            return false;
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Ошибка при загрузке: " + e.getMessage());
+            return false;
+        }
+    }
+}
+
+
+
+
